@@ -28,8 +28,19 @@ humidity = st.number_input("Humidity (%)", min_value=0, max_value=100, value=50)
 ph = st.number_input("pH value", min_value=0.0, max_value=14.0, value=6.5)
 rainfall = st.number_input("Rainfall (mm)", min_value=0, max_value=500, value=100)
 
-# Prediction
+# Prediction with Top-3 recommendations
 if st.button("Recommend Crop"):
     features = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
-    prediction = model.predict(features)
-    st.success(f"🌾 Recommended Crop: **{prediction[0]}**")
+    
+    # Prediction probabilities
+    probs = model.predict_proba(features)[0]
+    
+    # Get top 3 crop indices
+    top3_idx = np.argsort(probs)[-3:][::-1]
+    
+    st.success(f"🌾 Best Recommended Crop: **{model.classes_[top3_idx[0]]}**")
+    
+    st.write("### 🌟 Other Possible Crops:")
+    for i in top3_idx:
+        st.write(f"- {model.classes_[i]} → {probs[i]*100:.2f}% confidence")
+
